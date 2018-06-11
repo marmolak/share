@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+        echo "Usage $0 file"
+        exit 1
+fi
+
+OLD_PWD=$PWD
+FILE_NAME=$1
+
+if [[ ${FILE_NAME:0:2} == "./" ]]; then
+        FILE_NAME=${FILE_NAME:2}
+fi
+
+LINK=$(ps xas | cat <(date) - | md5sum | cut -d ' ' -f 1)
+
+pushd /var/www/share/ &> /dev/null
+ln -s "${OLD_PWD}" "./${LINK}"
+echo "https://share.ihack.cz/${LINK}/${FILE_NAME}"
+popd &> /dev/null
