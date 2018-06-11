@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo "Usage $0 file"
+    exit 1
+fi
+
+if [[ $1 == "flush" ]]; then
+    pushd /var/www/share/fss &> /dev/null
+    rm -f *
+    exit 0
+fi
+
+if [[ $1 == "list" ]]; then
+    pushd /var/www/share/fss &> /dev/null
+    ls
+    exit 0
+fi
+
+OLD_PWD=$PWD
+FILE_NAME=$1
+
+if [[ ${FILE_NAME} == "./" ]]; then
+    FILE_NAME=${OLD_PWD}
+fi
+
+if [[ ${FILE_NAME:0:2} == "./" ]]; then
+    FILE_NAME=${FILE_NAME:2}
+fi
+
+LINK=$(ps xas | cat <(date) - | md5sum | cut -d ' ' -f 1)
+
+SHARED_FILENAME=$(basename "${FILE_NAME}")
+SHARED_FILENAME="${SHARED_FILENAME// /+}"
+
+pushd /var/www/share/fss &> /dev/null
+echo "${OLD_PWD},${SHARED_FILENAME}" > "./${LINK}"
+echo "https://share.ihack.cz/zip/${LINK}"
+popd &> /dev/null
